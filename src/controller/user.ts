@@ -143,6 +143,13 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     // Update refreshToken in the database or secure storage
     user.refreshToken = newRefreshToken;
+
+    // Update device tokens
+    const deviceToken = req.body.deviceToken;
+    if (deviceToken && !user.deviceToken.includes(deviceToken)) {
+      user.deviceToken.push(deviceToken);
+    }
+    
     await user.save();
 
     return res.status(200).json({
