@@ -115,4 +115,44 @@ export const logIn = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const refreshToken = async (req: Request, res: Response) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(401).json({
+      message: "Refresh token is required",
+    });
+  }
+
+  try {
+    const jwtKey = process.env.JWT_KEY;
+    if (!jwtKey) {
+      throw new Error("JWT secret key is missing in environment variables.");
+    }
+
+    const decoded = jwt.verify(token, jwtKey) as any;
+    const user = await User.findById(decoded.userID).exec();
+    if (!user || user.refreshToken !== token) {
+      return res.status(403).json({
+        message: "Invalid refresh token",
+      });
+    }
+
+    const newAccessToken = generateAccessToken(user, jwtKey);
+    const newRefreshToken = generateRefreshToken(user, jwtKey);
+
+    // Update refreshToken in the database or secure storage
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    return res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json({
+      message: "Invalid refresh token",
+    });
+  }
 };
