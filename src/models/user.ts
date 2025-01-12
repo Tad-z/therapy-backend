@@ -16,6 +16,14 @@ const userSchema: Schema<UserInt> = new mongoose.Schema({
     type: String,
     required: true
   },
+  refreshToken: {
+    type: String,
+    required: true
+  },
+  deviceToken: {
+    type: [String],
+    required: true
+  }
 });
 
 // Define and export the User model

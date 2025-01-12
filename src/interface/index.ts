@@ -4,6 +4,8 @@ export type UserInt = {
   fullName: string;
   email: string;
   password: string;
+  refreshToken: string
+  deviceToken: string[];
 };
 
 export type DecodedTokenInt = {

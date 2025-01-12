@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user"; 
+import { generateAccessToken, generateRefreshToken } from "../logic/user";
 
 const validateEmail = (email: string): boolean => {
   const regex = new RegExp(
@@ -94,29 +95,24 @@ export const logIn = async (req: Request, res: Response) => {
       if (!jwtKey) {
         throw new Error("JWT secret key is missing in environment variables.");
       }
-      const token = jwt.sign(
-        {
-          fullName: user.fullName,
-          userID: user._id,
-          email: user.email
-        },
-        jwtKey,
-        {
-          expiresIn: "1h",
-        }
-      );
+      const accessToken = generateAccessToken(user, jwtKey);
+      const refreshToken = generateRefreshToken(user, jwtKey);
+
+      // Store refreshToken in the database or a secure storage
+      user.refreshToken = refreshToken;
+      await user.save();
+
       return res.status(200).json({
         message: `Authentication successful`,
-        token: token,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       });
     }
-    return res.status(401).json({
-      message: `email or password incorrect`,
-    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
       message: "Internal server error",
     });
   }
+};
 };
