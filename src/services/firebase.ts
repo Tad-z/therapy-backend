@@ -5,12 +5,16 @@ import { NotificationDataInt, UserInt } from "../interface";
 import Notification from "../models/notification";
 
 // Path to your service account key file
-const serviceAccountPath = path.join(__dirname, "firebase_service_account.json");
+
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(require(serviceAccountPath)),
+    credential: admin.credential.cert({
+      projectId: "therapy-notis",
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: "firebase-adminsdk-98wj9@therapy-notis.iam.gserviceaccount.com"
+    })
   });
 }
   
