@@ -1,10 +1,11 @@
 import User from "../models/user";
 import { Request, Response } from 'express';
 import { sendNotificationToUser } from "../services/firebase";
+import { NotificationDataInt } from "../interface";
 
 export const broadcast = async (req: Request, res: Response) => {
     try {
-      const message = req.body;
+      const message: NotificationDataInt = req.body;
   
       // Find all users with device tokens
       const users = await User.find({ deviceToken: { $exists: true } });
