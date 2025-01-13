@@ -13,3 +13,10 @@ export type DecodedTokenInt = {
     userID: string;
     email: string,
   }
+
+  export type NotificationInt = {
+    userId: Schema.Types.ObjectId;
+    title: string;
+    body: string;
+    readStatus: boolean
+  };
