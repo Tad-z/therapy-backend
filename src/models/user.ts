@@ -18,11 +18,9 @@ const userSchema: Schema<UserInt> = new mongoose.Schema({
   },
   refreshToken: {
     type: String,
-    required: true
   },
   deviceToken: {
     type: [String],
-    required: true
   }
 });
 
