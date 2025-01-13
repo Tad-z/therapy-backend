@@ -6,9 +6,19 @@ import { NotificationDataInt } from "../interface";
 export const broadcast = async (req: Request, res: Response) => {
     try {
       const message: NotificationDataInt = req.body;
+      if (!message.title || !message.body) {
+        return res.status(400).json({ message: 'Message title and body are required.' });
+      }
   
       // Find all users with device tokens
-      const users = await User.find({ deviceToken: { $exists: true } });
+      const users = await User.find({
+        deviceToken: {
+          $exists: true,
+          $ne: [],
+          $type: 'array',
+          $not: { $size: 0 }
+        }
+      });
   
       if (!users || users.length === 0) {
         return res.status(404).json({ message: 'No users found.' });
