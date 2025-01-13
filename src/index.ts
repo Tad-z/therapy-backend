@@ -1,7 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from "dotenv";
-import main from "./src/models/db"; // Make sure the path is correct
-import userRouter from "./src/routes/user"; // Make sure the path is correct
+import main from "./models/db";
+import userRouter from "./routes/user"; 
+import notificationRouter from "./routes/notification";
 
 
 dotenv.config();
@@ -26,3 +27,4 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use("/user", userRouter);
+app.use("/notification", notificationRouter);
