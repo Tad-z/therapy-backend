@@ -1,12 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "build",
-    "removeComments": true
-  },
-  "include": [
-    "bin/**/*",
-    "src/**/*"
-  ]
+    "removeComments": true,
+    "sourceMap": false
+  }
 }
