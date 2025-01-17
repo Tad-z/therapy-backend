@@ -3,7 +3,7 @@ import { createSession, getAvailableSlots, getUserSessions, updateSession } from
 
 const router = express.Router();
 
-router.post('/', createSession);
+router.post('/', auth, createSession);
 router.get('/user/:userId', getUserSessions);
 router.put('/:sessionId', updateSession);
 router.get('/slots', getAvailableSlots);

@@ -5,7 +5,6 @@ import { predefinedTimeSlots } from '../utils/helpers';
 export const createSession = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
-      userId,
       name,
       age,
       contact,
@@ -18,6 +17,7 @@ export const createSession = async (req: Request, res: Response): Promise<Respon
       endTime,
     } = req.body;
 
+    const userId = req.user.userID;
     const dateOnly = new Date(date.toISOString().split('T')[0]);
 
     // Create and save the session
