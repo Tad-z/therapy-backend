@@ -76,3 +76,45 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<Re
   }
 };
 
+export const getUserSessions = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required.' });
+    }
+
+    const sessions = await Session.find({ userId });
+
+    return res.status(200).json({ sessions });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while fetching user sessions.', error });
+  }
+};
+
+export const updateSession = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        if (Object.keys(req.body).length === 0) {
+          return res.status(400).json({
+            message: "Data to update can not be empty!",
+          });
+        }
+        const { sessionId } = req.params;
+
+        if (!sessionId) {
+            return res.status(400).json({ message: 'Session ID is required.' });
+        }
+
+        await Session.findByIdAndUpdate(sessionId, req.body).then((data) => {
+          if (!data) {
+            return res.status(400).json({
+              message: `Cannot update Session with id=${sessionId}. Maybe Session was not found!`,
+            });
+          } else res.status(200).json({ message: "Session was updated successfully." });
+        });
+      } catch (err) {
+        console.log(err.message);
+        res.json("error");
+      }
+    }
