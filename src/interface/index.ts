@@ -15,7 +15,7 @@ export type DecodedTokenInt = {
     email: string,
   }
 
-  export type NotificationInt = {
+export type NotificationInt = {
     _id: Schema.Types.ObjectId;
     userId: Schema.Types.ObjectId;
     title: string;
@@ -23,7 +23,34 @@ export type DecodedTokenInt = {
     readStatus: boolean
   };
 
-  export type NotificationDataInt = {
+export type NotificationDataInt = {
     title: string;
     body: string;
   };
+
+export type SessionInt = {
+    userId: Schema.Types.ObjectId; // Reference to the user
+    name: string; // Name of the client
+    age: number; // Age of the client
+    contact: string; // Contact number of the client
+    residence: string; // Residence of the client
+    maritalStatus: maritalStatusInt; // Enum for marital status
+    reason: reasonInt; // Enum for reason of session
+    additionalInfo?: string; // Optional field for additional case details
+    date: Date; // Date of the session
+    startTime: string; // Start time of the session
+    endTime: string; // End time of the session
+  }
+
+export enum maritalStatusInt {
+    SINGLE = "Single",
+    MARRIED = "Married",
+    DIVORCED = "Divorced",
+  }
+
+export enum reasonInt {
+    PERSONAL = "Personal Growth",
+    RELATIONSHIP = "Relationship Issues",
+    EDUCATION = "Educational Issues",
+    OTHERS = "Others",
+  }
