@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import main from "./models/db";
 import userRouter from "./routes/user"; 
 import notificationRouter from "./routes/notification";
+import sessionRouter from "./routes/session";
 
 
 dotenv.config();
@@ -28,3 +29,4 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/user", userRouter);
 app.use("/notification", notificationRouter);
+app.use("/session", sessionRouter);
