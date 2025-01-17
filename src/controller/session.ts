@@ -18,7 +18,7 @@ export const createSession = async (req: Request, res: Response): Promise<Respon
     } = req.body;
 
     const userId = req.user.userID;
-    const dateOnly = new Date(date.toISOString().split('T')[0]);
+    const dateOnly = new Date(new Date(date).toISOString().split('T')[0]);
 
     // Create and save the session
     const session = new Session({
