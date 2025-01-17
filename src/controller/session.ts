@@ -30,7 +30,7 @@ export const createSession = async (req: Request, res: Response): Promise<Respon
       maritalStatus,
       reason,
       additionalInfo,
-      dateOnly,
+      date: dateOnly,
       startTime,
       endTime,
     });
