@@ -1,14 +1,14 @@
 // Helper function to generate predefined slots
 export const predefinedTimeSlots = (): { startTime: string; endTime: string }[] => {
     return [
-      { startTime: '09:00 AM', endTime: '09:45 AM' },
-      { startTime: '10:00 AM', endTime: '10:45 AM' },
-      { startTime: '11:00 AM', endTime: '11:45 AM' },
-      { startTime: '12:00 PM', endTime: '12:45 PM' },
-      { startTime: '01:00 PM', endTime: '01:45 PM' },
-      { startTime: '02:00 PM', endTime: '02:45 PM' },
-      { startTime: '03:00 PM', endTime: '03:45 PM' },
-      { startTime: '04:00 PM', endTime: '04:45 PM' },
+      { startTime: '09:00', endTime: '09:45' },
+      { startTime: '11:00', endTime: '11:45' },
+      { startTime: '10:00', endTime: '10:45' },
+      { startTime: '12:00', endTime: '12:45' },
+      { startTime: '13:00', endTime: '13:45' },
+      { startTime: '14:00', endTime: '14:45' },
+      { startTime: '15:00', endTime: '15:45' },
+      { startTime: '16:00', endTime: '16:45' },
     ];
   };
   
