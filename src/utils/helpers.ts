@@ -2,8 +2,8 @@
 export const predefinedTimeSlots = (): { startTime: string; endTime: string }[] => {
     return [
       { startTime: '09:00', endTime: '09:45' },
-      { startTime: '11:00', endTime: '11:45' },
       { startTime: '10:00', endTime: '10:45' },
+      { startTime: '11:00', endTime: '11:45' },
       { startTime: '12:00', endTime: '12:45' },
       { startTime: '13:00', endTime: '13:45' },
       { startTime: '14:00', endTime: '14:45' },
