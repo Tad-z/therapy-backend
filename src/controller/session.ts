@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Session from '../models/session';
 import { predefinedTimeSlots } from '../utils/helpers';
+import { statusInt } from '../interface';
 
 export const createSession = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -18,6 +19,7 @@ export const createSession = async (req: Request, res: Response): Promise<Respon
     } = req.body;
 
     const userId = req.user.userID;
+    console.log(date);
     const dateOnly = new Date(new Date(date).toISOString().split('T')[0]);
 
     // Create and save the session
@@ -118,3 +120,96 @@ export const updateSession = async (req: Request, res: Response): Promise<Respon
         res.json("error");
       }
     }
+    
+export const getSessionStatus = async (req: Request, res: Response): Promise<Response> => {
+      try {
+        const { sessionId } = req.query;
+    
+        if (!sessionId) {
+          return res.status(400).json({ message: 'Session ID is required.' });
+        }
+    
+        const session = await Session.findById(sessionId);
+    
+        if (!session) {
+          return res.status(404).json({ message: 'Session not found.' });
+        }
+    
+        const userId = req.user?.userID; 
+        if (session.userId.toString() !== userId) {
+          return res.status(403).json({ message: 'You are not authorized to access this session.' });
+        }
+    
+        // Check if the session is currently active
+        const now = new Date();
+        const isSessionActive = now >= new Date(session.startTime) && now <= new Date(session.endTime);
+    
+        return res.status(200).json({
+          isSessionActive,
+          sessionDetails: {
+            sessionId: session._id,
+            startTime: session.startTime,
+            endTime: session.endTime,
+            userId: session.userId,
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching session status:', error);
+        return res.status(500).json({ message: 'An error occurred while checking session status.', error });
+      }
+    };
+
+    export const startSession = async (req: Request, res: Response): Promise<Response> => {
+      try {
+        const { sessionId } = req.body;
+    
+        // Validate input
+        if (!sessionId) {
+          return res.status(400).json({ message: 'Session ID is required.' });
+        }
+    
+        // Fetch session from the database
+        const session = await Session.findById(sessionId);
+    
+        if (!session) {
+          return res.status(404).json({ message: 'Session not found.' });
+        }
+    
+        const userId = req.user?.userID; 
+        if (session.userId.toString() !== userId) {
+          return res.status(403).json({ message: 'You are not authorized to start this session.' });
+        }
+    
+        const now = new Date();
+        const isSessionActive = now >= new Date(session.startTime) && now <= new Date(session.endTime);
+    
+        if (!isSessionActive) {
+          return res.status(400).json({ message: 'You can only start the session during the scheduled time.' });
+        }
+    
+        if (session.status === statusInt.STARTED) {
+          return res.status(400).json({ message: 'The session has already been started.' });
+        }
+    
+        // Start the session
+        session.status = statusInt.STARTED;
+        session.startedAt = now; 
+        await session.save();
+    
+        return res.status(200).json({
+          message: 'Session started successfully.',
+          sessionDetails: {
+            sessionId: session._id,
+            startTime: session.startTime,
+            endTime: session.endTime,
+            status: session.status,
+            startedAt: session.startedAt,
+          },
+        });
+      } catch (error) {
+        console.error('Error starting session:', error);
+        return res.status(500).json({ message: 'An error occurred while starting the session.', error });
+      }
+    };
+    
+    

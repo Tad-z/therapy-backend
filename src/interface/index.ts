@@ -40,6 +40,8 @@ export type SessionInt = {
     date: Date; // Date of the session
     startTime: string; // Start time of the session
     endTime: string; // End time of the session
+    status: statusInt; // Enum for status of the session
+    startedAt?: Date; // Start time of the session
   }
 
 export enum maritalStatusInt {
@@ -54,3 +56,10 @@ export enum reasonInt {
     EDUCATION = "Educational Issues",
     OTHERS = "Others",
   }
+
+export enum statusInt {
+  PENDING = "Pending",
+  STARTED = "Started",
+  COMPLETED = "Completed",
+  CANCELLED = "Cancelled",
+}

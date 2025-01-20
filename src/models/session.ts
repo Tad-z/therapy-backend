@@ -1,5 +1,11 @@
 import mongoose, { Model, Schema } from "mongoose";
-import { SessionInt, maritalStatusInt, reasonInt } from "../interface";
+import {
+  SessionInt,
+  maritalStatusInt,
+  reasonInt,
+  statusInt,
+} from "../interface";
+import { stat } from "fs";
 
 // Create a Mongoose schema
 const sessionSchema: Schema<SessionInt> = new mongoose.Schema(
@@ -48,6 +54,14 @@ const sessionSchema: Schema<SessionInt> = new mongoose.Schema(
     endTime: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: statusInt,
+      default: statusInt.PENDING,
+    },
+    startedAt: {
+      type: Date,
     },
   },
   {
