@@ -1,12 +1,13 @@
 import express from 'express';
-import { createSession, getAvailableSlots, getSessionStatus, getUserSessions, updateSession } from '../controller/session';
+import { createSession, getAvailableSlots, getSessionStatus, getUserSessions, startSession, updateSession } from '../controller/session';
 import auth from '../Authorization/auth';
 
 const router = express.Router();
 
 router.post('/', auth, createSession);
 router.get('/status/:sessionId', getSessionStatus);
-router.get('/:sessionId', updateSession);
+router.get('/start', startSession);
+router.get('/:sessionId', getUserSessions);
 router.put('/:sessionId', updateSession);
 router.get('/slots', getAvailableSlots);
 
