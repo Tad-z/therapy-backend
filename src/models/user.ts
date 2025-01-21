@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { UserInt } from '../interface';
+import { roleInt, UserInt } from '../interface';
 
 
 // Create a Mongoose schema
@@ -21,6 +21,11 @@ const userSchema: Schema<UserInt> = new mongoose.Schema({
   },
   deviceToken: {
     type: [String],
+  },
+  role: {
+    type: String,
+    enum: roleInt,
+    default: roleInt.USER
   }
 });
 

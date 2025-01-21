@@ -7,6 +7,7 @@ export type UserInt = {
   password: string;
   refreshToken?: string
   deviceToken?: string[];
+  role: roleInt;
 };
 
 export type DecodedTokenInt = {
@@ -69,4 +70,9 @@ export enum statusInt {
   STARTED = "Started",
   COMPLETED = "Completed",
   CANCELLED = "Cancelled",
+}
+
+export enum roleInt {
+  ADMIN = "Admin",
+  USER = "User",
 }
