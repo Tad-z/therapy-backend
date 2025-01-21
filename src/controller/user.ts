@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/user"; 
+import User from "../models/user";
 import { generateAccessToken, generateRefreshToken } from "../logic/user";
+import { roleInt } from "../interface";
 
 const validateEmail = (email: string): boolean => {
   const regex = new RegExp(
@@ -33,7 +34,15 @@ export const createUser = async (req: Request, res: Response) => {
         message: "User already exists",
       });
     }
+    let role = req.body.role;
 
+
+    if (role && !Object.values(roleInt).includes(role)) {
+      return res.status(400).json({ error: "Invalid role provided" });
+    }
+
+
+    role = role || roleInt.USER;
     bcrypt.hash(req.body.password, 10, async (err, hash) => {
       if (err) {
         console.log(err);
@@ -42,6 +51,7 @@ export const createUser = async (req: Request, res: Response) => {
           fullName: req.body.fullName.toLowerCase(),
           email: req.body.email,
           password: hash,
+          role,
         });
 
         try {
@@ -149,7 +159,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     if (deviceToken && !user.deviceToken.includes(deviceToken)) {
       user.deviceToken.push(deviceToken);
     }
-    
+
     await user.save();
 
     return res.status(200).json({
