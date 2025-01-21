@@ -4,12 +4,26 @@ import main from "./models/db";
 import userRouter from "./routes/user"; 
 import notificationRouter from "./routes/notification";
 import sessionRouter from "./routes/session";
+import http from 'http';
+import { Server } from 'socket.io';
+import { setupSocket } from "./services/socket";
+import { set } from "mongoose";
 
 
 dotenv.config();
 
 const app: Application = express();
 const PORT: number = 3001;
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Replace with your frontend URL in production
+    methods: ['GET', 'POST'],
+  },
+});
+
+setupSocket(io);
 
 main()
   .then(() => {

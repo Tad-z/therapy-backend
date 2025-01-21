@@ -5,10 +5,10 @@ import auth from '../Authorization/auth';
 const router = express.Router();
 
 router.post('/', auth, createSession);
+router.get('/slots', getAvailableSlots);
 router.get('/status/:sessionId', getSessionStatus);
 router.get('/start', startSession);
 router.get('/:sessionId', getUserSessions);
 router.put('/:sessionId', updateSession);
-router.get('/slots', getAvailableSlots);
 
 export default router;

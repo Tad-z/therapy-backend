@@ -44,6 +44,13 @@ export type SessionInt = {
     startedAt?: Date; // Start time of the session
   }
 
+export type ChatInt = {
+    sessionId: Schema.Types.ObjectId; // Reference to the session
+    sender: string; // ID of the sender
+    text: string; // Message text
+    timestamp: Date; // Timestamp of the message
+  };
+
 export enum maritalStatusInt {
     SINGLE = "Single",
     MARRIED = "Married",

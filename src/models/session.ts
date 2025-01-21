@@ -5,7 +5,6 @@ import {
   reasonInt,
   statusInt,
 } from "../interface";
-import { stat } from "fs";
 
 // Create a Mongoose schema
 const sessionSchema: Schema<SessionInt> = new mongoose.Schema(
