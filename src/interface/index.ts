@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 
 export type UserInt = {
   _id: Schema.Types.ObjectId;
+  image: string;
   fullName: string;
   email: string;
   password: string;

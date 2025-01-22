@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user";
 import { generateAccessToken, generateRefreshToken } from "../logic/user";
 import { roleInt } from "../interface";
+import cloudinary from "../services/cloudinary";
 
 const validateEmail = (email: string): boolean => {
   const regex = new RegExp(
@@ -84,6 +85,62 @@ export const createUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      users,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const addUserImage = async (req: Request, res: Response) => {
+  try {
+    const userId  = req.user?.userID;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        message: "Image is required",
+      });
+    }
+
+    const user = await User.findById(userId).exec();
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Upload to cloudinary
+    const result = await cloudinary.uploader.upload(file.path);
+
+    // Update user image
+    user.image = result.secure_url;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Image updated successfully",
+      image: user.image
+    });
+
+  } catch (error) {
+    console.error("Error updating image:", error);
+    return res.status(500).json({
+      message: "Error updating image",
+      error: error.message
+    });
+  }
+};
+
+
+    
 
 export const logIn = async (req: Request, res: Response) => {
   try {

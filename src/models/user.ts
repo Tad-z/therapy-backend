@@ -4,6 +4,9 @@ import { roleInt, UserInt } from '../interface';
 
 // Create a Mongoose schema
 const userSchema: Schema<UserInt> = new mongoose.Schema({
+  image: {
+    type: String,
+  },
   fullName: {
     type: String,
     required: true
