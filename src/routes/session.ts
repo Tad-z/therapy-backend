@@ -5,9 +5,9 @@ import auth from '../Authorization/auth';
 const router = express.Router();
 
 router.post('/', auth, createSession);
+router.post('/start', auth, startSession);
 router.get('/slots', getAvailableSlots);
-router.get('/status/:sessionId', getSessionStatus);
-router.get('/start', startSession);
+router.get('/status/:sessionId', auth, getSessionStatus);
 router.get('/:sessionId', getUserSessions);
 router.put('/:sessionId', updateSession);
 
