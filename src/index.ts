@@ -4,6 +4,7 @@ import main from "./models/db";
 import userRouter from "./routes/user"; 
 import notificationRouter from "./routes/notification";
 import sessionRouter from "./routes/session";
+import quoteRouter from "./routes/quote";
 import http from 'http';
 import { Server } from 'socket.io';
 import { setupSocket } from "./services/socket";
@@ -44,3 +45,4 @@ app.get('/', (req: Request, res: Response) => {
 app.use("/user", userRouter);
 app.use("/notification", notificationRouter);
 app.use("/session", sessionRouter);
+app.use("/quote", quoteRouter);
