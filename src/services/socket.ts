@@ -58,15 +58,30 @@ export const setupSocket = (io: Server) => {
     const remainingTime = Math.max(0, session.endTime.getTime() - Date.now());
     socket.emit("session_timer", { remainingTime });
 
-    // Set up a periodic check for session end
-    const sessionEndCheckInterval = setInterval(() => {
-      if (Date.now() >= session.endTime.getTime()) {
-        clearInterval(sessionEndCheckInterval); // Clear the interval to stop further checks
+    const endSession = async () => {
+      try {
+        await Session.findByIdAndUpdate(session._id, {
+          status: statusInt.COMPLETED,
+          endedAt: new Date()
+        });
+        
         io.to(session._id.toString()).emit("session_ended", {
           message: "The session has ended.",
+          status: statusInt.COMPLETED
         });
+        
+        clearInterval(sessionEndCheckInterval);
+      } catch (error) {
+        console.error("Error ending session:", error);
       }
-    }, 1000); // Check every second
+    };
+
+    // Set up a periodic check for session end
+    const sessionEndCheckInterval = setInterval(async () => {
+      if (Date.now() >= session.endTime.getTime()) {
+        await endSession();
+      }
+    }, 1000);
 
     socket.on("reconnect", () => {
       console.log(`User reconnected: ${socket.data.user._id}`);
@@ -111,6 +126,15 @@ export const setupSocket = (io: Server) => {
 
     socket.on("stop_typing", ({ sessionId }) => {
       socket.to(sessionId).emit("user_stopped_typing", { userId: user._id });
+    });
+
+        // Add manual end session handler
+    socket.on("end_session", async () => {
+      if (isTherapist) {
+        await endSession();
+      } else {
+        socket.emit("error", { message: "Only therapist can end session" });
+      }
     });
 
     socket.on("disconnect", () => {
