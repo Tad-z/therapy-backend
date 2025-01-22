@@ -155,7 +155,7 @@ export const getSessionStatus = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const { sessionId } = req.query;
+    const { sessionId } = req.params;
 
     if (!sessionId) {
       return res.status(400).json({ message: "Session ID is required." });
