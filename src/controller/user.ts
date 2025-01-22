@@ -118,8 +118,10 @@ export const addUserImage = async (req: Request, res: Response) => {
       });
     }
 
+    const fileStr = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+
     // Upload to cloudinary
-    const result = await cloudinary.uploader.upload(file.path);
+    const result = await cloudinary.uploader.upload(fileStr);
 
     // Update user image
     user.image = result.secure_url;
