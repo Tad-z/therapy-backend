@@ -25,7 +25,7 @@ const userSchema: Schema<UserInt> = new mongoose.Schema({
   role: {
     type: String,
     enum: roleInt,
-    default: roleInt.USER
+    default: roleInt.PATIENT
   }
 });
 

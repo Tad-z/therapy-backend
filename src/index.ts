@@ -7,7 +7,6 @@ import sessionRouter from "./routes/session";
 import http from 'http';
 import { Server } from 'socket.io';
 import { setupSocket } from "./services/socket";
-import { set } from "mongoose";
 
 
 dotenv.config();
@@ -18,8 +17,9 @@ const PORT: number = 3001;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Replace with your frontend URL in production
+    origin: '*',
     methods: ['GET', 'POST'],
+    credentials: true
   },
 });
 

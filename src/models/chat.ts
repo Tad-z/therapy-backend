@@ -7,7 +7,12 @@ const chatSchema: Schema<ChatInt> = new mongoose.Schema({
     ref: "Session",
     required: true,
   },
-  sender: { type: String, required: true },
+  senderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  senderName: { type: String, required: true },
   text: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
 });

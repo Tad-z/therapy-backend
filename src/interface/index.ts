@@ -47,7 +47,8 @@ export type SessionInt = {
 
 export type ChatInt = {
     sessionId: Schema.Types.ObjectId; // Reference to the session
-    sender: string; // ID of the sender
+    senderId: Schema.Types.ObjectId; // Reference to the user
+    senderName: string; // Name of the
     text: string; // Message text
     timestamp: Date; // Timestamp of the message
   };
@@ -73,6 +74,6 @@ export enum statusInt {
 }
 
 export enum roleInt {
-  ADMIN = "Admin",
-  USER = "User",
+  THERAPIST = "Therapist",
+  PATIENT = "Patient",
 }
