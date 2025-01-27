@@ -8,7 +8,7 @@ router.post('/', auth, createSession);
 router.post('/start', auth, startSession);
 router.get('/slots', getAvailableSlots);
 router.get('/status/:sessionId', auth, getSessionStatus);
-router.get('/:sessionId', getUserSessions);
+router.get('/:userId', getUserSessions);
 router.put('/:sessionId', updateSession);
 
 export default router;
