@@ -207,8 +207,8 @@ export const startSession = async (
     const { sessionId } = req.body;
 
     // Validate input
-    if (!sessionId) {
-      return res.status(400).json({ message: "Session ID is required." });
+    if (!sessionId || !mongoose.Types.ObjectId.isValid(sessionId)) {
+      return res.status(400).json({ message: "Invalid Session ID." });
     }
 
     // Fetch session from the database
@@ -226,20 +226,24 @@ export const startSession = async (
     }
 
     const now = new Date();
-    console.log({now})
-const sessionStartTime = new Date(`${session.date}T${session.startTime}`);
-    console.log({sessionStartTime})
-const sessionEndTime = new Date(`${session.date}T${session.endTime}`);
-    console.log({sessionEndTime})
 
-const isSessionActive = now >= sessionStartTime && now <= sessionEndTime;
+    // Extract the date portion from session.date (e.g., "2025-01-18")
+    const sessionDate = new Date(session.date).toISOString().split("T")[0];
+
+    // Combine the date with startTime and endTime
+    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00.000Z`);
+    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00.000Z`);
+
+    console.log({ now });
+    console.log({ sessionStartTime });
+    console.log({ sessionEndTime });
+
+    const isSessionActive = now >= sessionStartTime && now <= sessionEndTime;
 
     if (!isSessionActive) {
-      return res
-        .status(400)
-        .json({
-          message: "You can only start the session during the scheduled time.",
-        });
+      return res.status(400).json({
+        message: "You can only start the session during the scheduled time.",
+      });
     }
 
     if (session.status === statusInt.STARTED) {
@@ -264,12 +268,10 @@ const isSessionActive = now >= sessionStartTime && now <= sessionEndTime;
       },
     });
   } catch (error) {
-    console.error("Error starting session:", error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while starting the session.",
-        error,
-      });
+    console.error("Error starting session:", error.message);
+    return res.status(500).json({
+      message: "An error occurred while starting the session.",
+      error: error.message,
+    });
   }
 };
