@@ -207,7 +207,7 @@ export const startSession = async (
     const { sessionId } = req.body;
 
     // Validate input
-    if (!sessionId || !mongoose.Types.ObjectId.isValid(sessionId)) {
+    if (!sessionId) {
       return res.status(400).json({ message: "Invalid Session ID." });
     }
 
