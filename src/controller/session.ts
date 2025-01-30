@@ -225,14 +225,14 @@ export const startSession = async (
         .json({ message: "You are not authorized to start this session." });
     }
 
-    const now = new Date();
+    const now = new Date(); // This is in UTC
 
     // Extract the date portion from session.date (e.g., "2025-01-18")
     const sessionDate = new Date(session.date).toISOString().split("T")[0];
 
-    // Combine the date with startTime and endTime
-    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00.000Z`);
-    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00.000Z`);
+    // Combine the date with startTime and endTime, treating them as UTC
+    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00Z`);
+    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00Z`);
 
     console.log({ now });
     console.log({ sessionStartTime });
