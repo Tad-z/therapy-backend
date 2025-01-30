@@ -226,8 +226,11 @@ export const startSession = async (
     }
 
     const now = new Date();
+    console.log({now})
 const sessionStartTime = new Date(`${session.date}T${session.startTime}`);
+    console.log({sessionStartTime})
 const sessionEndTime = new Date(`${session.date}T${session.endTime}`);
+    console.log({sessionEndTime})
 
 const isSessionActive = now >= sessionStartTime && now <= sessionEndTime;
 
