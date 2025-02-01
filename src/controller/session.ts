@@ -221,18 +221,14 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
     const nowUTC = new Date();
     const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
 
-    // Extract session date and construct Nigerian time versions
+    // The session startTime and endTime are already in Nigerian time
     const sessionDate = new Date(session.date).toISOString().split("T")[0]; // "YYYY-MM-DD"
-    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`);
-    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);
+    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`); // Already Nigeria time
+    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);   // Already Nigeria time
 
-    // Adjust session start and end times to Nigerian time
-    const sessionStartTimeNigeria = new Date(sessionStartTime.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
-    const sessionEndTimeNigeria = new Date(sessionEndTime.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
+    console.log({ nowNigeria, sessionStartTime, sessionEndTime });
 
-    console.log({ nowNigeria, sessionStartTimeNigeria, sessionEndTimeNigeria });
-
-    if (nowNigeria < sessionStartTimeNigeria || nowNigeria > sessionEndTimeNigeria) {
+    if (nowNigeria < sessionStartTime || nowNigeria > sessionEndTime) {
       return res.status(400).json({
         message: "You can only start the session during the scheduled time.",
       });
@@ -265,3 +261,4 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
     });
   }
 };
+
