@@ -199,62 +199,52 @@ export const getSessionStatus = async (
   }
 };
 
-export const startSession = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const startSession = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { sessionId } = req.body;
 
-    // Validate input
     if (!sessionId) {
       return res.status(400).json({ message: "Invalid Session ID." });
     }
 
-    // Fetch session from the database
     const session = await Session.findById(sessionId);
-
     if (!session) {
       return res.status(404).json({ message: "Session not found." });
     }
 
     const userId = req.user?.userID;
     if (session.userId.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to start this session." });
+      return res.status(403).json({ message: "You are not authorized to start this session." });
     }
 
-    const now = new Date(); // This is in UTC
+    // Convert `now` to Nigerian time (Africa/Lagos, UTC+1)
+    const nowUTC = new Date();
+    const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
 
-    // Extract the date portion from session.date (e.g., "2025-01-18")
-    const sessionDate = new Date(session.date).toISOString().split("T")[0];
+    // Extract session date and construct Nigerian time versions
+    const sessionDate = new Date(session.date).toISOString().split("T")[0]; // "YYYY-MM-DD"
+    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`);
+    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);
 
-    // Combine the date with startTime and endTime, treating them as UTC
-    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00Z`);
-    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00Z`);
+    // Adjust session start and end times to Nigerian time
+    const sessionStartTimeNigeria = new Date(sessionStartTime.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
+    const sessionEndTimeNigeria = new Date(sessionEndTime.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
 
-    console.log({ now });
-    console.log({ sessionStartTime });
-    console.log({ sessionEndTime });
+    console.log({ nowNigeria, sessionStartTimeNigeria, sessionEndTimeNigeria });
 
-    const isSessionActive = now >= sessionStartTime && now <= sessionEndTime;
-
-    if (!isSessionActive) {
+    if (nowNigeria < sessionStartTimeNigeria || nowNigeria > sessionEndTimeNigeria) {
       return res.status(400).json({
         message: "You can only start the session during the scheduled time.",
       });
     }
 
     if (session.status === statusInt.STARTED) {
-      return res
-        .status(400)
-        .json({ message: "The session has already been started." });
+      return res.status(400).json({ message: "The session has already been started." });
     }
 
     // Start the session
     session.status = statusInt.STARTED;
-    session.startedAt = now;
+    session.startedAt = nowNigeria;
     await session.save();
 
     return res.status(200).json({
