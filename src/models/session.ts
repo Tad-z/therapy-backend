@@ -13,6 +13,10 @@ const sessionSchema: Schema<SessionInt> = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    therapistId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
     name: {
       type: String,
       required: true,

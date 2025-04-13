@@ -32,6 +32,7 @@ export type NotificationDataInt = {
 
 export type SessionInt = {
     userId: Schema.Types.ObjectId; // Reference to the user
+    therapistId: Schema.Types.ObjectId; // Reference to the therapist
     name: string; // Name of the client
     age: number; // Age of the client
     contact: string; // Contact number of the client

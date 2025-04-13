@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Session from "../models/session";
 import { predefinedTimeSlots } from "../utils/helpers";
 import { statusInt } from "../interface";
+import User from "../models/user";
 
 export const createSession = async (
   req: Request,
@@ -9,6 +10,7 @@ export const createSession = async (
 ): Promise<Response> => {
   try {
     const {
+      therapistId,
       name,
       age,
       contact,
@@ -28,6 +30,7 @@ export const createSession = async (
     // Create and save the session
     const session = new Session({
       userId,
+      therapistId,
       name,
       age,
       contact,
@@ -217,6 +220,12 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
       return res.status(403).json({ message: "You are not authorized to start this session." });
     }
 
+    const therapistId = session.therapistId
+    const therapist = await User.findById(therapistId)
+    if(!therapist) {
+      return res.status(404).json({ message: "Therapist not found for the session" })
+    }
+
     // Convert `now` to Nigerian time (Africa/Lagos, UTC+1)
     const nowUTC = new Date();
     const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
@@ -251,6 +260,11 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
         endTime: session.endTime,
         status: session.status,
         startedAt: session.startedAt,
+        therapistDetails: {
+          therapistId,
+          fullName: therapist.fullName,
+          email: therapist.email,
+        }
       },
     });
   } catch (error) {
