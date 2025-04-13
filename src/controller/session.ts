@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Session from "../models/session";
 import { predefinedTimeSlots } from "../utils/helpers";
-import { statusInt } from "../interface";
+import { roleInt, statusInt } from "../interface";
 import User from "../models/user";
 
 export const createSession = async (
@@ -220,10 +220,16 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
       return res.status(403).json({ message: "You are not authorized to start this session." });
     }
 
-    const therapistId = session.therapistId
-    const therapist = await User.findById(therapistId)
+    const therapistId = session.therapistId;
+    if (!therapistId) {
+      return res.status(400).json({ message: "Therapist ID is invalid or missing." });
+    }
+    const therapist = await User.findById(therapistId);
     if(!therapist) {
       return res.status(404).json({ message: "Therapist not found for the session" })
+    }
+    if (therapist.role != roleInt.THERAPIST) {
+      return res.status(400).json({ message: "User is not a therapist" })
     }
 
     // Convert `now` to Nigerian time (Africa/Lagos, UTC+1)
