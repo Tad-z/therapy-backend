@@ -234,16 +234,16 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
 
     // Convert `now` to Nigerian time (Africa/Lagos, UTC+1)
     const nowUTC = new Date();
-    const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
+    // const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
 
     // The session startTime and endTime are already in Nigerian time
     const sessionDate = new Date(session.date).toISOString().split("T")[0]; // "YYYY-MM-DD"
     const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`); // Already Nigeria time
     const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);   // Already Nigeria time
 
-    console.log({ nowNigeria, sessionStartTime, sessionEndTime });
+    console.log({ nowUTC, sessionStartTime, sessionEndTime });
 
-    if (nowNigeria < sessionStartTime || nowNigeria > sessionEndTime) {
+    if (nowUTC < sessionStartTime || nowUTC > sessionEndTime) {
       return res.status(400).json({
         message: "You can only start the session during the scheduled time.",
       });
@@ -255,7 +255,7 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
 
     // Start the session
     session.status = statusInt.STARTED;
-    session.startedAt = nowNigeria;
+    session.startedAt = nowUTC;
     await session.save();
 
     return res.status(200).json({
