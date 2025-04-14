@@ -25,7 +25,7 @@ export const createSession = async (
 
     const userId = req.user.userID;
     console.log(date);
-    const dateOnly = new Date(new Date(date).toISOString().split("T")[0]);
+    // const dateOnly = new Date(new Date(date).toISOString().split("T")[0]);
 
     // Create and save the session
     const session = new Session({
@@ -38,9 +38,9 @@ export const createSession = async (
       maritalStatus,
       reason,
       additionalInfo,
-      date: dateOnly,
-      startTime,
-      endTime,
+      date: new Date(date), // if you're storing this as Date
+      startTime: new Date(startTime), // already in ISO format
+      endTime: new Date(endTime), // already in ISO format
     });
 
     await session.save();
@@ -51,14 +51,48 @@ export const createSession = async (
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while creating the session.",
-        error,
-      });
+    return res.status(500).json({
+      message: "An error occurred while creating the session.",
+      error,
+    });
   }
 };
+
+// export const getAvailableSlots = async (
+//   req: Request,
+//   res: Response
+// ): Promise<Response> => {
+//   try {
+//     const { date } = req.query;
+
+//     if (!date) {
+//       return res.status(400).json({ message: "Date is required." });
+//     }
+
+//     // Get all sessions for the given date
+//     const sessions = await Session.find({ date: new Date(date as string) });
+
+//     // Get predefined time slots
+//     const timeSlots = predefinedTimeSlots();
+
+//     // Filter out booked slots
+//     const availableSlots = timeSlots.filter((slot) => {
+//       return !sessions.some(
+//         (session) =>
+//           session.startTime === slot.startTime &&
+//           session.endTime === slot.endTime
+//       );
+//     });
+
+//     return res.status(200).json({ availableSlots });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "An error occurred while fetching available slots.",
+//       error,
+//     });
+//   }
+// };
 
 export const getAvailableSlots = async (
   req: Request,
@@ -71,30 +105,41 @@ export const getAvailableSlots = async (
       return res.status(400).json({ message: "Date is required." });
     }
 
-    // Get all sessions for the given date
-    const sessions = await Session.find({ date: new Date(date as string) });
+    const dateStr = date as string;
+    const dateOnlyStr = new Date(dateStr).toISOString().split("T")[0]; // "2025-04-15"
+    
+    const startOfDay = new Date(`${dateOnlyStr}T00:00:00.000Z`);
+    const endOfDay = new Date(`${dateOnlyStr}T23:59:59.999Z`);
+    
+    const sessions = await Session.find({
+      startTime: { $gte: startOfDay, $lte: endOfDay },
+    });
 
-    // Get predefined time slots
+    console.log("Sessions for the day:", sessions);
+    
+
     const timeSlots = predefinedTimeSlots();
 
-    // Filter out booked slots
     const availableSlots = timeSlots.filter((slot) => {
-      return !sessions.some(
-        (session) =>
-          session.startTime === slot.startTime &&
-          session.endTime === slot.endTime
-      );
+      const slotStart = new Date(`${dateOnlyStr}T${slot.startTime}:00Z`);
+      const slotEnd = new Date(`${dateOnlyStr}T${slot.endTime}:00Z`);
+    
+      return !sessions.some((session) => {
+        return (
+          new Date(session.startTime).getTime() === slotStart.getTime() &&
+          new Date(session.endTime).getTime() === slotEnd.getTime()
+        );
+      });
     });
+    
 
     return res.status(200).json({ availableSlots });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while fetching available slots.",
-        error,
-      });
+    return res.status(500).json({
+      message: "An error occurred while fetching available slots.",
+      error,
+    });
   }
 };
 
@@ -114,12 +159,10 @@ export const getUserSessions = async (
     return res.status(200).json({ sessions });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while fetching user sessions.",
-        error,
-      });
+    return res.status(500).json({
+      message: "An error occurred while fetching user sessions.",
+      error,
+    });
   }
 };
 
@@ -193,16 +236,17 @@ export const getSessionStatus = async (
     });
   } catch (error) {
     console.error("Error fetching session status:", error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred while checking session status.",
-        error,
-      });
+    return res.status(500).json({
+      message: "An error occurred while checking session status.",
+      error,
+    });
   }
 };
 
-export const startSession = async (req: Request, res: Response): Promise<Response> => {
+export const startSession = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const { sessionId } = req.body;
 
@@ -217,29 +261,54 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
 
     const userId = req.user?.userID;
     if (session.userId.toString() !== userId) {
-      return res.status(403).json({ message: "You are not authorized to start this session." });
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to start this session." });
     }
 
     const therapistId = session.therapistId;
     if (!therapistId) {
-      return res.status(400).json({ message: "Therapist ID is invalid or missing." });
+      return res
+        .status(400)
+        .json({ message: "Therapist ID is invalid or missing." });
     }
     const therapist = await User.findById(therapistId);
-    if(!therapist) {
-      return res.status(404).json({ message: "Therapist not found for the session" })
+    if (!therapist) {
+      return res
+        .status(404)
+        .json({ message: "Therapist not found for the session" });
     }
     if (therapist.role != roleInt.THERAPIST) {
-      return res.status(400).json({ message: "User is not a therapist" })
+      return res.status(400).json({ message: "User is not a therapist" });
     }
 
     // Convert `now` to Nigerian time (Africa/Lagos, UTC+1)
-    const nowUTC = new Date();
-    // const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
+    // const nowUTC = new Date();
+    // // const nowNigeria = new Date(nowUTC.toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
 
-    // The session startTime and endTime are already in Nigerian time
-    const sessionDate = new Date(session.date).toISOString().split("T")[0]; // "YYYY-MM-DD"
-    const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`); // Already Nigeria time
-    const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);   // Already Nigeria time
+    // // The session startTime and endTime are already in Nigerian time
+    // const sessionDate = new Date(session.date).toISOString().split("T")[0]; // "YYYY-MM-DD"
+    // const sessionStartTime = new Date(`${sessionDate}T${session.startTime}:00`); // Already Nigeria time
+    // const sessionEndTime = new Date(`${sessionDate}T${session.endTime}:00`);   // Already Nigeria time
+    // const nowUTC = new Date();
+
+    // The session startTime and endTime are already in UTC time
+    // const sessionStartTime = new Date(
+    //   `${session.date}T${session.startTime}:00`
+    // );
+    // const sessionEndTime = new Date(`${session.date}T${session.endTime}:00`);
+
+    // console.log({ nowUTC, sessionStartTime, sessionEndTime });
+
+    // if (nowUTC < sessionStartTime || nowUTC > sessionEndTime) {
+    //   return res.status(400).json({
+    //     message: "You can only start the session during the scheduled time.",
+    //   });
+    // }
+    const nowUTC = new Date();
+
+    const sessionStartTime = new Date(session.startTime); // no need to construct
+    const sessionEndTime = new Date(session.endTime);
 
     console.log({ nowUTC, sessionStartTime, sessionEndTime });
 
@@ -249,8 +318,11 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
       });
     }
 
+
     if (session.status === statusInt.STARTED) {
-      return res.status(400).json({ message: "The session has already been started." });
+      return res
+        .status(400)
+        .json({ message: "The session has already been started." });
     }
 
     // Start the session
@@ -270,7 +342,7 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
           therapistId,
           fullName: therapist.fullName,
           email: therapist.email,
-        }
+        },
       },
     });
   } catch (error) {
@@ -281,4 +353,3 @@ export const startSession = async (req: Request, res: Response): Promise<Respons
     });
   }
 };
-

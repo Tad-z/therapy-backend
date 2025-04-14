@@ -41,8 +41,8 @@ export type SessionInt = {
     reason: reasonInt; // Enum for reason of session
     additionalInfo?: string; // Optional field for additional case details
     date: Date; // Date of the session
-    startTime: string; // Start time of the session
-    endTime: string; // End time of the session
+    startTime: Date; // Start time of the session
+    endTime: Date; // End time of the session
     status: statusInt; // Enum for status of the session
     startedAt?: Date; // Start time of the session
   }
