@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import Session from "../models/session";
 import { predefinedTimeSlots } from "../utils/helpers";
 import { roleInt, statusInt } from "../interface";
@@ -149,6 +149,22 @@ export const getAvailableSlots = async (
     });
   }
 };
+
+export const getAllSessions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const sessions = await Session.find();
+    return res.status(200).json({ sessions });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while fetching all sessions.",
+      error,
+    });
+  }
+}
 
 
 export const getUserSessions = async (
@@ -361,3 +377,19 @@ export const startSession = async (
     });
   }
 };
+
+export const deleteAllSessions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    await Session.deleteMany({});
+    return res.status(200).json({ message: "All sessions deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while deleting sessions.",
+      error,
+    });
+  }
+}
