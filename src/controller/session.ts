@@ -156,7 +156,23 @@ export const getAllSessions = async (
 ): Promise<Response> => {
   try {
     const sessions = await Session.find();
-    return res.status(200).json({ sessions });
+    // Fetch therapist details for each session
+    const sessionsWithTherapistDetails = await Promise.all(
+      sessions.map(async (session) => {
+        const therapist = await User.findById(session.therapistId);
+        return {
+          ...session.toObject(),
+          therapistDetails: therapist
+            ? {
+                fullName: therapist.fullName,
+                email: therapist.email,
+              }
+            : null,
+        };
+      })
+    );
+
+    return res.status(200).json({ sessions: sessionsWithTherapistDetails });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -164,7 +180,7 @@ export const getAllSessions = async (
       error,
     });
   }
-}
+};
 
 
 export const getUserSessions = async (
