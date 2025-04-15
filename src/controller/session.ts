@@ -24,7 +24,6 @@ export const createSession = async (
     } = req.body;
 
     const userId = req.user.userID;
-    console.log(date);
     // const dateOnly = new Date(new Date(date).toISOString().split("T")[0]);
 
     // Create and save the session
@@ -121,7 +120,6 @@ export const getAvailableSlots = async (
       startTime: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    console.log("Sessions for the therapist on the day:", sessions);
 
     const timeSlots = predefinedTimeSlots();
 
@@ -193,11 +191,11 @@ export const getUserSessions = async (
       return res.status(400).json({ message: "User ID is required." });
     }
 
-    const sessions = await Session.find({ userId });
+    const userSessions = await Session.find({ userId });
 
     // Fetch therapist details for each session
-    const sessionsWithTherapistDetails = await Promise.all(
-      sessions.map(async (session) => {
+    const userSessionsWithTherapistDetails = await Promise.all(
+      userSessions.map(async (session) => {
         const therapist = await User.findById(session.therapistId);
         return {
           ...session.toObject(),
@@ -211,7 +209,7 @@ export const getUserSessions = async (
       })
     );
 
-    return res.status(200).json({ sessions: sessionsWithTherapistDetails });
+    return res.status(200).json({ sessions: userSessionsWithTherapistDetails });
   } catch (error) {
     console.error(error);
     return res.status(500).json({

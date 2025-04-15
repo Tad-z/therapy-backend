@@ -59,7 +59,6 @@ export const createUser = async (req: Request, res: Response) => {
           const result = await newUser.save();
 
           if (result) {
-            console.log(result);
             res.status(200).json({
               result,
               message: "You have signed up successfully",
