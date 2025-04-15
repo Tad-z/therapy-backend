@@ -99,39 +99,46 @@ export const getAvailableSlots = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const { date } = req.query;
+    const { date, therapistId } = req.query;
 
     if (!date) {
       return res.status(400).json({ message: "Date is required." });
     }
 
+    if (!therapistId) {
+      return res.status(400).json({ message: "Therapist ID is required." });
+    }
+
     const dateStr = date as string;
-    const dateOnlyStr = new Date(dateStr).toISOString().split("T")[0]; // "2025-04-15"
-    
+    const dateOnlyStr = new Date(dateStr).toISOString().split("T")[0]; // "YYYY-MM-DD"
+
     const startOfDay = new Date(`${dateOnlyStr}T00:00:00.000Z`);
     const endOfDay = new Date(`${dateOnlyStr}T23:59:59.999Z`);
-    
+
+    // Fetch sessions for the given therapist and date
     const sessions = await Session.find({
+      therapistId,
       startTime: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    console.log("Sessions for the day:", sessions);
-    
+    console.log("Sessions for the therapist on the day:", sessions);
 
     const timeSlots = predefinedTimeSlots();
 
+    // Filter out slots that are already booked by the therapist
     const availableSlots = timeSlots.filter((slot) => {
       const slotStart = new Date(`${dateOnlyStr}T${slot.startTime}:00Z`);
       const slotEnd = new Date(`${dateOnlyStr}T${slot.endTime}:00Z`);
-    
+
       return !sessions.some((session) => {
+        const sessionStartUTC = new Date(session.startTime).getTime();
+        const sessionEndUTC = new Date(session.endTime).getTime();
         return (
-          new Date(session.startTime).getTime() === slotStart.getTime() &&
-          new Date(session.endTime).getTime() === slotEnd.getTime()
+          sessionStartUTC === slotStart.getTime() &&
+          sessionEndUTC === slotEnd.getTime()
         );
       });
     });
-    
 
     return res.status(200).json({ availableSlots });
   } catch (error) {
@@ -142,6 +149,7 @@ export const getAvailableSlots = async (
     });
   }
 };
+
 
 export const getUserSessions = async (
   req: Request,
