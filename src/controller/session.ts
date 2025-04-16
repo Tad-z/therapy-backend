@@ -23,10 +23,33 @@ export const createSession = async (
       endTime,
     } = req.body;
 
-    const userId = req.user.userID;
-    // const dateOnly = new Date(new Date(date).toISOString().split("T")[0]);
+    // Basic field validation
+    if (!therapistId || !name || !age || !contact || !residence || !maritalStatus || !reason || !date || !startTime || !endTime) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
 
-    // Create and save the session
+    // Validate date formats
+    const parsedDate = new Date(date);
+    const parsedStartTime = new Date(startTime);
+    const parsedEndTime = new Date(endTime);
+
+    if (isNaN(parsedDate.getTime()) || isNaN(parsedStartTime.getTime()) || isNaN(parsedEndTime.getTime())) {
+      return res.status(400).json({
+        message: "Invalid date or time format",
+      });
+    }
+
+    // Check if date is in the future
+    if (parsedDate < new Date()) {
+      return res.status(400).json({
+        message: "Session date must be in the future",
+      });
+    }
+
+    const userId = req.user.userID;
+
     const session = new Session({
       userId,
       therapistId,
@@ -37,9 +60,9 @@ export const createSession = async (
       maritalStatus,
       reason,
       additionalInfo,
-      date: new Date(date), // if you're storing this as Date
-      startTime: new Date(startTime), // already in ISO format
-      endTime: new Date(endTime), // already in ISO format
+      date: parsedDate,
+      startTime: parsedStartTime,
+      endTime: parsedEndTime,
     });
 
     await session.save();
@@ -224,28 +247,56 @@ export const updateSession = async (
   res: Response
 ): Promise<Response> => {
   try {
-    if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({
-        message: "Data to update can not be empty!",
+    const { sessionId } = req.params;
+    const updateData = req.body;
+
+    // Validate input
+    if (!sessionId) {
+      return res.status(400).json({ 
+        message: "Session ID is required." 
       });
     }
-    const { sessionId } = req.params;
 
-    if (!sessionId) {
-      return res.status(400).json({ message: "Session ID is required." });
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        message: "Data to update cannot be empty!"
+      });
     }
 
-    await Session.findByIdAndUpdate(sessionId, req.body).then((data) => {
-      if (!data) {
-        return res.status(400).json({
-          message: `Cannot update Session with id=${sessionId}. Maybe Session was not found!`,
-        });
-      } else
-        res.status(200).json({ message: "Session was updated successfully." });
+    // Handle date fields if present
+    if (updateData.startTime) {
+      updateData.startTime = new Date(updateData.startTime);
+    }
+    if (updateData.endTime) {
+      updateData.endTime = new Date(updateData.endTime);
+    }
+    if (updateData.date) {
+      updateData.date = new Date(updateData.date);
+    }
+
+    const session = await Session.findByIdAndUpdate(
+      sessionId,
+      updateData,
+      { new: true } // Return updated document
+    );
+
+    if (!session) {
+      return res.status(404).json({
+        message: `Session with id=${sessionId} not found`
+      });
+    }
+
+    return res.status(200).json({
+      message: "Session updated successfully",
+      session
     });
-  } catch (err) {
-    console.log(err.message);
-    res.json("error");
+
+  } catch (error) {
+    console.error("Update session error:", error);
+    return res.status(500).json({
+      message: "An error occurred while updating the session",
+      error: error.message
+    });
   }
 };
 
