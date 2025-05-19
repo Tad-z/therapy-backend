@@ -13,7 +13,7 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: "therapy-notis",
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      clientEmail: "firebase-adminsdk-98wj9@therapy-notis.iam.gserviceaccount.com"
+      clientEmail: process.env.CLIENT_EMAIL
     })
   });
 }
